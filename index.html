@@ -31,6 +31,28 @@
     <div class="container-md mt-5">
 
         <div class="row">
+            <div class="mb-3">
+                <label>ผลการประเมินความพึงพอใจในการดำเนินกิจกรรม EXCEL</label>
+                <input class="form-control" type="file" id="report1">
+            </div>
+            
+            <div class="mb-3">
+                <label>การประเมินตามวัตถุประสงค์ของโครงการ</label>
+                <input class="form-control" type="file" id="report2">
+            </div>
+
+            <div class="mb-3">
+                <label>ผลการประเมินความพึงพอใจในการดำเนินกิจกรรม CSV</label>
+                <input class="form-control" type="file" id="report1CSV">
+            </div>
+
+            <div class="mb-3">
+                <label>การประเมินตามวัตถุประสงค์ของโครงการ CSV</label>
+                <input class="form-control" type="file" id="report2CSV">
+            </div>
+        </div>
+
+        <div class="row">
             <div class="row">
                 <div class="col-12 text-center">แบบสรุปการประเมินผลการดำเนินกิจกรรม</div>
             </div>
@@ -120,30 +142,30 @@
                     <tbody>
                         <tr>
                             <td>1.ความเหมาะสมของรูปแบบการจัดงาน</td>
-                            <td class="text-center">5</td>
-                            <td class="text-center">100</td>
+                            <td class="text-center" id="svQ1Avg"></td>
+                            <td class="text-center" id="svQ1Per"></td>
                         </tr>
                         <tr>
                             <td>2.ความเหมาะสมของระยะเวลา</td>
-                            <td class="text-center">5</td>
-                            <td class="text-center">100</td>
+                            <td class="text-center" id="svQ2Avg"></td>
+                            <td class="text-center" id="svQ2Per"></td>
                         </tr>
                         <tr>
                             <td>3.ความตั้งใจของนิสิตขณะปฏิบัติงาน</td>
-                            <td class="text-center">5</td>
-                            <td class="text-center">100</td>
+                            <td class="text-center" id="svQ3Avg"></td>
+                            <td class="text-center" id="svQ3Per"></td>
                         </tr>
                         <tr>
                             <td>4.ความพึงพอใจต่อการประชาสัมพันธ์</td>
-                            <td class="text-center">5</td>
-                            <td class="text-center">100</td>
+                            <td class="text-center" id="svQ4Avg"></td>
+                            <td class="text-center" id="svQ4Per"></td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td class="text-end">ค่าเฉลี่ยรวม</td>
-                            <td class="text-center">5</td>
-                            <td class="text-center">100</td>
+                            <td class="text-center" id="svSumAvg"></td>
+                            <td class="text-center" id="svSumPer"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -241,16 +263,7 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="mb-3">
-                <label>ผลการประเมินความพึงพอใจในการดำเนินกิจกรรม</label>
-                <input class="form-control" type="file" id="report1">
-            </div>
-            <div class="mb-3">
-                <label>การประเมินตามวัตถุประสงค์ของโครงการ</label>
-                <input class="form-control" type="file" id="report2">
-            </div>
-        </div>
+
     </div>
 </body>
 <script src="https://unpkg.com/read-excel-file@5.x/bundle/read-excel-file.min.js"></script>
@@ -262,6 +275,63 @@
 
 
     $(document).ready(function () {
+        report1.on('change', function () {
+            let data1;
+            let exceljson;
+            var xlsxflag = true; /*Flag for checking whether excel is .xls format or .xlsx format*/
+            /*Checks whether the browser supports HTML5*/
+            if (typeof (FileReader) != "undefined") {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var data = e.target.result;
+                    let json = exceljsonConverter(data)
+                    let calData = Calexceljson(json)
+
+                    $("#svQ1Avg").text((calData[1] / json.length).toFixed(2))
+                    $("#svQ1Per").text(((calData[1] / json.length) * 20).toFixed(0))
+                    $("#svQ2Avg").text((calData[2] / json.length).toFixed(2))
+                    $("#svQ2Per").text(((calData[2] / json.length) * 20).toFixed(0))
+                    $("#svQ3Avg").text((calData[3] / json.length).toFixed(2))
+                    $("#svQ3Per").text(((calData[3] / json.length) * 20).toFixed(0))
+                    $("#svQ4Avg").text((calData[4] / json.length).toFixed(2))
+                    $("#svQ4Per").text(((calData[4] / json.length) * 20).toFixed(0))
+                    $("#svSumAvg").text((calData[0] / json.length / (calData.length - 1)).toFixed(2))
+                    $("#svSumPer").text(((calData[0] / json.length / (calData.length - 1)) * 20).toFixed(0))
+
+                }
+                if (xlsxflag) {/*If excel file is .xlsx extension than creates a Array Buffer from excel*/
+                    reader.readAsArrayBuffer($("#report1")[0].files[0]);
+                }
+                else {
+                    reader.readAsBinaryString($("#report1")[0].files[0]);
+                }
+            }
+            else {
+                alert("Sorry! Your browser does not support HTML5!");
+            }
+
+
+        })
+
+        $("#report1CSV").on('change', function () {
+            var csv = $("#report1CSV")[0].files[0];
+            if (csv !== undefined) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var rows = e.target.result;
+                    console.log(rows)
+
+                    var convertjson = csvjsonConverter(rows, ",");
+                    console.log(convertjson)
+
+                };
+                reader.readAsText(csv);
+            }
+            else {
+                alert("Please upload your csv file.");
+            }
+        });
+
         report2.on('change', function () {
             let data2;
             let exceljson;
@@ -271,104 +341,22 @@
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     var data = e.target.result;
-                    /*Converts the excel data in to object*/
-                    if (xlsxflag) {
-                        var workbook = XLSX.read(data, { type: 'binary' });
-                    }
-                    else {
-                        var workbook = XLS.read(data, { type: 'binary' });
-                    }
-                    /*Gets all the sheetnames of excel in to a variable*/
-                    var sheet_name_list = workbook.SheetNames;
+                    var data = e.target.result;
+                    let json = exceljsonConverter(data)
+                    let calData = Calexceljson(json)
 
-                    var cnt = 0; /*This is used for restricting the script to consider only first sheet of excel*/
-                    let sumq1 = 0
-                    let cntq1 = 0
+                    let q1 = ((calData[1] / json.length) * 20).toFixed(0)
+                    let q2 = ((calData[2] / json.length) * 20).toFixed(0)
+                    let sum = (((calData[0] / json.length / (calData.length - 1)) * 20)).toFixed(0)
 
-                    let sumq2 = 0
-                    let cntq2 = 0
+                    $("#q1Score").text(q1)
+                    $("#q2Score").text(q2)
+                    $("#sumScore").text(sum)
 
-                    sheet_name_list.forEach(function (y) { /*Iterate through all sheets*/
-                        /*Convert the cell value to Json*/
-                        if (xlsxflag) {
-                            exceljson = XLSX.utils.sheet_to_json(workbook.Sheets[y]);
-                        }
-                        else {
-                            exceljson = XLS.utils.sheet_to_row_object_array(workbook.Sheets[y]);
-                        }
+                    RangeDisplayText(q1, $("#q1Text"))
+                    RangeDisplayText(q2, $("#q2Text"))
+                    RangeDisplayText(sum, $("#sumText"))
 
-                        if (exceljson.length > 0 && cnt == 0) {
-                            // BindTable(exceljson, '#report2');
-                            // console.log(exceljson)
-                            let columnSet = [];
-                            for (var i = 0; i < exceljson.length; i++) {
-                                var rowHash = exceljson[i];
-                                for (var key in rowHash) {
-                                    if (rowHash.hasOwnProperty(key)) {
-                                        if ($.inArray(key, columnSet) == -1) {/*Adding each unique column names to a variable array*/
-                                            columnSet.push(key);
-                                        }
-                                    }
-                                }
-                            }
-                            for (var i = 0; i < exceljson.length; i++) {
-                                var cellValue1 = exceljson[i][columnSet[1]];
-                                if (cellValue1 != null && cellValue1 != "") {
-                                    sumq1 += parseInt(cellValue1)
-                                    cntq1++
-                                }
-                                var cellValue2 = exceljson[i][columnSet[2]];
-                                if (cellValue2 != null && cellValue2 != "") {
-                                    sumq2 += parseInt(cellValue2)
-                                    cntq2++
-                                }
-                            }
-                            dataReport1 = { "q1": (sumq1 / cntq1 * 20), "q2": (sumq2 / cntq2 * 20), "sum": ((sumq1 / cntq1 * 20) + (sumq2 / cntq2 * 20)) / (2) }
-
-                            $("#q1Score").text((dataReport1.q1).toFixed(2))
-                            $("#q2Score").text((dataReport1.q2).toFixed(2))
-                            $("#sumScore").text((dataReport1.sum).toFixed(2))
-                            // =IF(C40="","",IF(C40<50,"ควรปรับปรุง",IF(C40<70,"พอใช้","ประสบความสำเร็จ")))
-                            if(dataReport1.q1 >=70){
-                                $("#q1Text").text("ประสบความสำเร็จ")
-                            }
-                            else if(dataReport1.q1 >=50){
-                                $("#q1Text").text("พอใช้")
-
-                            }
-                            else if(dataReport1.q1 <50){
-                                $("#q1Text").text("ควรปรับปรุง")
-
-                            }
-
-                            if(dataReport1.q2 >=70){
-                                $("#q2Text").text("ประสบความสำเร็จ")
-                            }
-                            else if(dataReport1.q2 >=50){
-                                $("#q2Text").text("พอใช้")
-
-                            }
-                            else if(dataReport1.q2 <50){
-                                $("#q2Text").text("ควรปรับปรุง")
-
-                            }
-
-                            if(dataReport1.sum >=70){
-                                $("#sumText").text("ประสบความสำเร็จ")
-                            }
-                            else if(dataReport1.sum >=50){
-                                $("#sumText").text("พอใช้")
-
-                            }
-                            else if(dataReport1.sum <50){
-                                $("#sumText").text("ควรปรับปรุง")
-
-                            }
-
-
-                            cnt++;
-                        }
-                    });
 
                 }
                 if (xlsxflag) {/*If excel file is .xlsx extension than creates a Array Buffer from excel*/
@@ -387,76 +375,21 @@
 
     })
 
-    function getExcelJson() {
-
-        var xlsxflag = true; /*Flag for checking whether excel is .xls format or .xlsx format*/
-        /*Checks whether the browser supports HTML5*/
-        if (typeof (FileReader) != "undefined") {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var data = e.target.result;
-                /*Converts the excel data in to object*/
-                if (xlsxflag) {
-                    var workbook = XLSX.read(data, { type: 'binary' });
-                }
-                else {
-                    var workbook = XLS.read(data, { type: 'binary' });
-                }
-                /*Gets all the sheetnames of excel in to a variable*/
-                var sheet_name_list = workbook.SheetNames;
-
-                var cnt = 0; /*This is used for restricting the script to consider only first sheet of excel*/
-                sheet_name_list.forEach(function (y) { /*Iterate through all sheets*/
-                    /*Convert the cell value to Json*/
-                    if (xlsxflag) {
-                        var exceljson = XLSX.utils.sheet_to_json(workbook.Sheets[y]);
-                    }
-                    else {
-                        var exceljson = XLS.utils.sheet_to_row_object_array(workbook.Sheets[y]);
-                    }
-                    if (exceljson.length > 0 && cnt == 0) {
-                        return exceljson
-                        let columnSet = [];
-                        for (var i = 0; i < exceljson.length; i++) {
-                            var rowHash = exceljson[i];
-                            for (var key in rowHash) {
-                                if (rowHash.hasOwnProperty(key)) {
-                                    if ($.inArray(key, columnSet) == -1) {/*Adding each unique column names to a variable array*/
-                                        columnSet.push(key);
-                                    }
-                                }
-                            }
-                        }
-                        console.log(columnSet)
-
-                        for (var i = 0; i < exceljson.length; i++) {
-                            for (var colIndex = 0; colIndex < columnSet.length; colIndex++) {
-                                var cellValue = exceljson[i][columnSet[colIndex]];
-                                if (cellValue == null)
-                                    cellValue = "";
-                                console.log(colIndex, cellValue)
-                            }
-                        }
-
-
-
-                        cnt++;
-                    }
-                });
-
-            }
-            if (xlsxflag) {/*If excel file is .xlsx extension than creates a Array Buffer from excel*/
-                reader.readAsArrayBuffer($("#report2")[0].files[0]);
-            }
-            else {
-                reader.readAsBinaryString($("#report2")[0].files[0]);
-            }
+    function RangeDisplayText(data, target) {
+        if (data >= 70) {
+            target.text("ประสบความสำเร็จ")
         }
-        else {
-            alert("Sorry! Your browser does not support HTML5!");
-        }
+        else if (data >= 50) {
+            target.text("พอใช้")
 
-    }  
+        }
+        else if (data < 50) {
+            target.text("ควรปรับปรุง")
+
+        }
+    }
 </script>
+
+<script src="/script.js"></script>
 
 </html>

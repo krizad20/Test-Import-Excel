@@ -35,7 +35,7 @@
                 <label>ผลการประเมินความพึงพอใจในการดำเนินกิจกรรม EXCEL</label>
                 <input class="form-control" type="file" id="report1">
             </div>
-            
+
             <div class="mb-3">
                 <label>การประเมินตามวัตถุประสงค์ของโครงการ</label>
                 <input class="form-control" type="file" id="report2">
@@ -313,24 +313,6 @@
 
         })
 
-        $("#report1CSV").on('change', function () {
-            var csv = $("#report1CSV")[0].files[0];
-            if (csv !== undefined) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    var rows = e.target.result;
-                    console.log(rows)
-
-                    var convertjson = csvjsonConverter(rows, ",");
-                    console.log(convertjson)
-
-                };
-                reader.readAsText(csv);
-            }
-            else {
-                alert("Please upload your csv file.");
-            }
-        });
 
         report2.on('change', function () {
             let data2;
@@ -372,6 +354,117 @@
 
 
         })
+
+        $("#report1CSV").on('change', function () {
+            var csv = $("#report1CSV")[0].files[0];
+            if (csv !== undefined) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var rows = e.target.result;
+                    console.log(rows)
+
+                    let convertjson = csvjsonConverter(rows, ",");
+                    let data = CalCsvJson(convertjson);
+                    console.log(data)
+                    console.log()
+
+
+
+                    let sum = 0
+                    for (const key in data) {
+                        if ($("#svQ1Avg").prevAll().text().includes(key)) {
+                            $("#svQ1Avg").text((data[key] / convertjson.length).toFixed(2))
+                            $("#svQ1Per").text(((data[key] / convertjson.length) * 20).toFixed(0))
+                            sum += data[key] / convertjson.length
+                        }
+                        if ($("#svQ2Avg").prevAll().text().includes(key)) {
+                            $("#svQ2Avg").text((data[key] / convertjson.length).toFixed(2))
+                            $("#svQ2Per").text(((data[key] / convertjson.length) * 20).toFixed(0))
+                            sum += data[key] / convertjson.length
+
+                        }
+                        if ($("#svQ3Avg").prevAll().text().includes(key)) {
+                            $("#svQ3Avg").text((data[key] / convertjson.length).toFixed(2))
+                            $("#svQ3Per").text(((data[key] / convertjson.length) * 20).toFixed(0))
+                            sum += data[key] / convertjson.length
+
+                        }
+                        if ($("#svQ4Avg").prevAll().text().includes(key)) {
+                            $("#svQ4Avg").text((data[key] / convertjson.length).toFixed(2))
+                            $("#svQ4Per").text(((data[key] / convertjson.length) * 20).toFixed(0))
+                            sum += data[key] / convertjson.length
+
+                        }
+
+                        $("#svSumAvg").text((sum / 4).toFixed(2))
+                        $("#svSumPer").text(((sum / 4) * 20).toFixed(0))
+
+                    }
+
+
+
+
+
+
+                };
+                reader.readAsText(csv);
+            }
+            else {
+                alert("Please upload your csv file.");
+            }
+        });
+
+
+        $("#report2CSV").on('change', function () {
+            var csv = $("#report2CSV")[0].files[0];
+            if (csv !== undefined) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var rows = e.target.result;
+                    console.log(rows)
+
+                    let convertjson = csvjsonConverter(rows, ",");
+                    let data = CalCsvJson(convertjson);
+                    console.log(data)
+                    console.log()
+
+                    let q1;
+                    let q2;
+                    let sum;
+
+
+                    for (const key in data) {
+                        if ($("#q1Score").prevAll().text().includes(key)) {
+                            q1 = ((data[key] / convertjson.length) * 20).toFixed(0)
+                        }
+                        if ($("#q2Score").prevAll().text().includes(key)) {
+                            q2 = ((data[key] / convertjson.length) * 20).toFixed(0)
+                        }
+                        // $("#q2Score").text(q2)
+                        // $("#sumScore").text(sum)
+                    }
+                    sum = (parseInt(q1) + parseInt(q2)) / 2
+
+                    $("#q1Score").text(q1)
+                    $("#q2Score").text(q2)
+                    $("#sumScore").text(sum)
+
+                    RangeDisplayText(q1, $("#q1Text"))
+                    RangeDisplayText(q2, $("#q2Text"))
+                    RangeDisplayText(sum, $("#sumText"))
+
+
+
+
+
+
+                };
+                reader.readAsText(csv);
+            }
+            else {
+                alert("Please upload your csv file.");
+            }
+        });
 
     })
 

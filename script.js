@@ -1,4 +1,5 @@
 var csvjsonConverter = (csvdata, delimiter) => {
+    console.log(csvdata)
     //This array will store the each of the patterns from the regular expression below.
     let arrmatch = [];
 
@@ -41,6 +42,7 @@ var csvjsonConverter = (csvdata, delimiter) => {
         array[array.length - 1].push(quotevals);
     }
 
+    console.log(array)
 
 
     //This will parse the resulting array into JSON format
@@ -51,9 +53,6 @@ var csvjsonConverter = (csvdata, delimiter) => {
             jsonarray[i - 1][key] = array[i][j]
         }
     }
-
-    console.log(jsonarray)
-
 
     //This will determine what the properties of each values are from the JSON
     //such as removing quotes for integer value.
@@ -119,7 +118,6 @@ var Calexceljson = (exceljson) => {
         }
     }
 
-    console.log(columnSet)
     for (var i = 0; i < exceljson.length; i++) {
         for (let j = 1; j < columnSet.length; j++) {
             const element = exceljson[i][columnSet[j]];
@@ -127,8 +125,32 @@ var Calexceljson = (exceljson) => {
             columnSum[j] += parseInt(element);
         }
     }
-    
+
     console.log(columnSum)
+    return columnSum
+}
+
+var CalCsvJson = (csvJson) => {
+    let columnSet = csvJson[-1];
+
+    let columnSum = csvJson[-1];
+
+    for (const key in columnSum) {
+        columnSum[key] = 0;
+    }
+
+
+    for (var i = 0; i < csvJson.length; i++) {
+        for (let x in columnSet) {
+            const element = csvJson[i][x];
+            console.log(element)
+
+
+            columnSum[x] += parseInt(element);
+        }
+    }
+
+
     return columnSum
 }
 
